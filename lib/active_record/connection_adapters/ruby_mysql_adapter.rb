@@ -2,7 +2,6 @@ require 'active_record/connection_adapters/abstract_mysql_adapter'
 require 'active_record/connection_adapters/statement_pool'
 require 'active_support/core_ext/hash/keys'
 
-gem 'mysql', '~> 2.8.1'
 require 'mysql'
 
 class Mysql
@@ -20,7 +19,7 @@ end
 module ActiveRecord
   class Base
     # Establishes a connection to the database that's used by all Active Record objects.
-    def self.mysql_connection(config) # :nodoc:
+    def self.ruby_mysql_connection(config) # :nodoc:
       config = config.symbolize_keys
       host     = config[:host]
       port     = config[:port]
@@ -35,7 +34,7 @@ module ActiveRecord
       default_flags = Mysql.const_defined?(:CLIENT_MULTI_RESULTS) ? Mysql::CLIENT_MULTI_RESULTS : 0
       default_flags |= Mysql::CLIENT_FOUND_ROWS if Mysql.const_defined?(:CLIENT_FOUND_ROWS)
       options = [host, username, password, database, port, socket, default_flags]
-      ConnectionAdapters::MysqlAdapter.new(mysql, logger, options, config)
+      ConnectionAdapters::RubyMysqlAdapter.new(mysql, logger, options, config)
     end
   end
 
@@ -59,7 +58,7 @@ module ActiveRecord
     # * <tt>:sslcapath</tt> - Necessary to use MySQL with an SSL connection.
     # * <tt>:sslcipher</tt> - Necessary to use MySQL with an SSL connection.
     #
-    class MysqlAdapter < AbstractMysqlAdapter
+    class RubyMysqlAdapter < AbstractMysqlAdapter
 
       class Column < AbstractMysqlAdapter::Column #:nodoc:
         def self.string_to_time(value)
@@ -85,11 +84,11 @@ module ActiveRecord
         end
 
         def adapter
-          MysqlAdapter
+          RubyMysqlAdapter
         end
       end
 
-      ADAPTER_NAME = 'MySQL'
+      ADAPTER_NAME = 'RubyMysql'
 
       class StatementPool < ConnectionAdapters::StatementPool
         def initialize(connection, max = 1000)
